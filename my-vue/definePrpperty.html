@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">defin</div>
+    <script>
+        let data = {
+            msg: 'hello'
+        }
+        let vm = {}
+
+        Object.defineProperty(vm, 'msg', {
+            enumerable: true,
+            configurable: true,
+            get() {
+                console.log('get:', data.msg)
+                return data.msg
+            },
+            set(newV) {
+                console.log('set', newV)
+                if (newV == data.msg) return
+                data.msg = newV
+                document.querySelector("#app").textContent = data.msg
+            }
+        })
+
+        /* let vm = new Proxy(data, {
+            get(target, key) {
+                console.log(target)
+                console.log(`get,key:${key},${target[key]}`)
+                return target[key]
+            },
+            set(target, key, newV) {
+                console.log(`set,key:${key},${target[key]}, ${newV}`)
+                if (newV == target[key]) return
+                target[key] = newV
+                document.querySelector("#app").textContent = target[key]
+            }
+        }) */
+
+        /*   vm.msg = 'hellow 1'
+          console.log(vm.msg)
+        */
+        //事件触发器
+        /*  class EventEmitter {
+             constructor() {
+                 //this.subs = {}//事件堆栈
+                 this.subs = Object.create(null)
+             }
+             //注册事件
+             $on(eventType, handle) {
+                 this.subs[eventType] = this.subs[eventType] || []
+                 this.subs[eventType].push(handle)
+             }
+             //触发事件
+             $emit() {
+                 if (this.subs[eventType]) {
+                     this.subs[eventType].forEach(handle => {
+                         handle()
+                     });
+                 }
+             }
+
+         } */
+
+    </script>
+</body>
+
+
+</html>
