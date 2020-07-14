@@ -28,17 +28,28 @@ class Compiler {
     }
 
     update(node, key, attrName) {
-        let uodateFn = this[`${attrName}Updater`]
-        //uodateFn(node, node[key])
-        uodateFn && uodateFn(node, this.vm[key])
+        let updateFn = this[`${attrName}Updater`]
+        //updateFn(node, node[key])
+        updateFn && updateFn.call(this, node, this.vm[key], key)
     }
 
-    textUpdater(node, value) {
+    textUpdater(node, value, key) {
         node.textContent = value
+        new Watcher(this.vm, key, (value) => {
+            node.textContent = value
+        })
     }
 
-    modelUpdater(node, value) {
+    modelUpdater(node, value, key) {
         node.value = value
+
+        node.addEventListener("input", () => {
+            this.vm[key] = node.value
+        })
+
+        new Watcher(this.vm, key, (value) => {
+            node.value = value
+        })
     }
 
     compilerText(node) {
@@ -48,8 +59,10 @@ class Compiler {
         if (reg.test(value)) {
             let key = RegExp.$1.trim()
             node.textContent = value.replace(reg, this.vm[key])
+            new Watcher(this.vm, key, (newValue) => {
+                node.textContent = newValue
+            })
         }
-
     }
     isDirective(attrName) {
         return attrName.startsWith('v-')
