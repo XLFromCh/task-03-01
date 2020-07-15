@@ -17,6 +17,8 @@
         <h1>v-model</h1>
         <input type="text" v-model="msg">
         <input type="text" v-model="count">
+        <h1 v-on:click="testHandle">v-html,v-on</h1>
+        <div v-html="myhtml"></div>
     </div>
     <script src="./js/dep.js"></script>
     <script src="./js/watcher.js"></script>
@@ -31,6 +33,13 @@
                 count: 80,
                 person: {
                     name: '张三'
+                },
+                myhtml: `<div>test</div>`,
+            },
+            methods: {
+                testHandle() {
+                    console.log('v-on测试')
+                    console.log(this)
                 }
             }
         })

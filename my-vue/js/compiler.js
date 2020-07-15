@@ -28,11 +28,30 @@ class Compiler {
     }
 
     update(node, key, attrName) {
+        if (attrName.startsWith('on')) {
+            console.log(attrName)
+            let eventType = attrName.split(":")[1]
+
+            this.onUpdater.call(this, node, eventType, key)
+            return
+        }
         let updateFn = this[`${attrName}Updater`]
         //updateFn(node, node[key])
         updateFn && updateFn.call(this, node, this.vm[key], key)
     }
 
+    onUpdater(node, eventType, key) {
+        const eventName = `on${eventType}`
+        node[eventName] = this.vm[key].bind(this.vm, arguments)
+
+    }
+
+    htmlUpdater(node, value, key) {
+        node.innerHTML = value
+        new Watcher(this.vm, key, (value) => {
+            node.innerHTML = value
+        })
+    }
     textUpdater(node, value, key) {
         node.textContent = value
         new Watcher(this.vm, key, (value) => {
@@ -64,6 +83,8 @@ class Compiler {
             })
         }
     }
+
+
     isDirective(attrName) {
         return attrName.startsWith('v-')
     }
