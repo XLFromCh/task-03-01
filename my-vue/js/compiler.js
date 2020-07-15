@@ -27,49 +27,71 @@ class Compiler {
     });
   }
 
-  update(node, key, attrName) {
-    let uodateFn = this[`${attrName}Updater`];
-    //uodateFn(node, node[key])
-    uodateFn && uodateFn.call(this, node, this.vm[key], key);
-  }
+    update(node, key, attrName) {
+        if (attrName.startsWith('on')) {
+            console.log(attrName)
+            let eventType = attrName.split(":")[1]
 
-  textUpdater(node, value, key) {
-    node.textContent = value;
-    new Watcher(this.vm, key, (nv) => {
-      node.textContent = nv;
-    });
-  }
-
-  modelUpdater(node, value, key) {
-    node.addEventListener("input", () => {
-      this.vm[key] = node.value;
-    });
-    node.value = value;
-    new Watcher(this.vm, key, (nv) => {
-      node.value = nv;
-    });
-  }
-
-  compilerText(node) {
-    //console.dir(node)
-    let reg = /\{\{(.+?)\}\}/;
-    let value = node.textContent;
-    if (reg.test(value)) {
-      let key = RegExp.$1.trim();
-      node.textContent = value.replace(reg, this.vm[key]);
-
-      new Watcher(this.vm, key, (nv) => {
-        node.textContent = nv;
-      });
+            this.onUpdater.call(this, node, eventType, key)
+            return
+        }
+        let updateFn = this[`${attrName}Updater`]
+        //updateFn(node, node[key])
+        updateFn && updateFn.call(this, node, this.vm[key], key)
     }
-  }
-  isDirective(attrName) {
-    return attrName.startsWith("v-");
-  }
-  isTextNode(node) {
-    return node.nodeType === 3;
-  }
-  isElementNode(node) {
-    return node.nodeType === 1;
-  }
+
+    onUpdater(node, eventType, key) {
+        const eventName = `on${eventType}`
+        node[eventName] = this.vm[key].bind(this.vm, arguments)
+
+    }
+
+    htmlUpdater(node, value, key) {
+        node.innerHTML = value
+        new Watcher(this.vm, key, (value) => {
+            node.innerHTML = value
+        })
+    }
+    textUpdater(node, value, key) {
+        node.textContent = value
+        new Watcher(this.vm, key, (value) => {
+            node.textContent = value
+        })
+    }
+
+    modelUpdater(node, value, key) {
+        node.value = value
+
+        node.addEventListener("input", () => {
+            this.vm[key] = node.value
+        })
+
+        new Watcher(this.vm, key, (value) => {
+            node.value = value
+        })
+    }
+
+    compilerText(node) {
+        //console.dir(node)
+        let reg = /\{\{(.+?)\}\}/
+        let value = node.textContent
+        if (reg.test(value)) {
+            let key = RegExp.$1.trim()
+            node.textContent = value.replace(reg, this.vm[key])
+            new Watcher(this.vm, key, (newValue) => {
+                node.textContent = newValue
+            })
+        }
+    }
+
+
+    isDirective(attrName) {
+        return attrName.startsWith('v-')
+    }
+    isTextNode(node) {
+        return node.nodeType === 3
+    }
+    isElementNode(node) {
+        return node.nodeType === 1
+    }
 }
